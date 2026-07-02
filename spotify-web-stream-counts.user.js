@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Spotify Web Stream Counts
 // @namespace    https://open.spotify.com/
-// @version      1.0.0
+// @version      1.0.1
 // @description  Adds app-style Spotify play counts to artist and album track rows. Hidden on playlists. No analytics, backend, or stored credentials.
 // @author       Atharv Joshi
 // @license      MIT
@@ -34,7 +34,6 @@
   let spotifyAppVersion = '';
   let renderQueued = false;
   let cacheSaveTimer = 0;
-  let statusTimer = 0;
 
   const originalFetch = window.fetch.bind(window);
   const OriginalXHR = window.XMLHttpRequest;
@@ -316,7 +315,6 @@
       ingestSpotifyResponse(json);
     } catch (error) {
       debug(`Could not load album ${albumId}`, error);
-      showStatus('Streams unavailable · reload Spotify once', 'error', 6000);
     } finally {
       pendingAlbums.delete(albumId);
     }
@@ -541,59 +539,12 @@
           }
         }
 
-        #sw-stream-count-status {
-          position: fixed;
-          right: 18px;
-          bottom: 104px;
-          z-index: 2147483646;
-          max-width: min(360px, calc(100vw - 36px));
-          padding: 9px 12px;
-          border: 1px solid rgba(255, 90, 90, 0.55);
-          border-radius: 8px;
-          background: rgba(24, 24, 24, 0.96);
-          color: #fff;
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-          font: 12px/1.35 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-          opacity: 0;
-          transform: translateY(5px);
-          pointer-events: none;
-          transition: opacity 140ms ease, transform 140ms ease;
-        }
-        #sw-stream-count-status[data-visible="true"] {
-          opacity: 1;
-          transform: translateY(0);
-        }
       `;
       (document.head ?? document.documentElement).appendChild(style);
     };
 
     if (document.documentElement) install();
     else document.addEventListener('DOMContentLoaded', install, { once: true });
-  }
-
-  function showStatus(message, kind = 'neutral', duration = 2500) {
-    if (!document.body) {
-      document.addEventListener('DOMContentLoaded', () => showStatus(message, kind, duration), { once: true });
-      return;
-    }
-
-    let status = document.getElementById('sw-stream-count-status');
-    if (!status) {
-      status = document.createElement('div');
-      status.id = 'sw-stream-count-status';
-      status.setAttribute('role', 'status');
-      status.setAttribute('aria-live', 'polite');
-      document.body.appendChild(status);
-    }
-
-    status.textContent = message;
-    status.dataset.kind = kind;
-    status.dataset.visible = 'true';
-
-    clearTimeout(statusTimer);
-    statusTimer = window.setTimeout(() => {
-      status.dataset.visible = 'false';
-    }, duration);
   }
 
   function loadCache() {
