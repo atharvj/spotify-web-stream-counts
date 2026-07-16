@@ -3,7 +3,7 @@
 // @namespace    https://open.spotify.com/
 // @version      1.0.1
 // @description  Adds app-style Spotify play counts to artist and album track rows. Hidden on playlists. No analytics, backend, or stored credentials.
-// @author       Atharv Joshi
+// @author       Intellectual07
 // @license      MIT
 // @match        https://open.spotify.com/*
 // @run-at       document-start
